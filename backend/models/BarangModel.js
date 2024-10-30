@@ -1,11 +1,12 @@
-import { Sequelize, UUID } from "sequelize";
+import { Sequelize } from "sequelize";
 import db from "../config/database.js";
 import Users from "./UserModel.js";
-import { FOREIGNKEYS } from "sequelize/lib/query-types";
+import Kategori from "./KategoriModel.js";
+import Lokasi from "./LokasiModel.js";
 
-const {DataTypes} = Sequelize;
+const { DataTypes } = Sequelize;
 
-const Users = db.define('barang', {
+const Barang = db.define('barang', {
     uuid: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
@@ -14,16 +15,8 @@ const Users = db.define('barang', {
             notEmpty: true
         }
     },
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-            notEmpty: true,
-            len:[3, 50]
-        }
-    },
-    harga: {
-        type: DataTypes.INTEGER,
+    nama_barang: {
+        type: DataTypes.STRING(50),
         allowNull: false,
         validate: {
             notEmpty: true
@@ -33,29 +26,62 @@ const Users = db.define('barang', {
         type: DataTypes.INTEGER,
         allowNull: false,
         validate: {
+            isInt: true,
             notEmpty: true
         }
     },
-    lokasi: {
+    deskripsi: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    tanggal_masuk: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    tanggal_keluar: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    kondisi: {
+        type: DataTypes.STRING(20),
+        allowNull: true
+    },
+    userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        validate: {
-            notEmpty: true
+        references: {
+            model: Users,
+            key: 'id'
         }
     },
-    UserId: {
+    kategoriId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        validate: {
-            notEmpty: true
+        references: {
+            model: Kategori,
+            key: 'id'
+        }
+    },
+    lokasiId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: Lokasi,
+            key: 'id'
         }
     }
-
 }, {
     freezeTableName: true
 });
 
-Users.hasMany(Barang);
-Barang.belongsTo(Users, {FOREIGNKEYS: 'UserId'})
+// Asosiasi
+Users.hasMany(Barang, { foreignKey: 'userId' });
+Barang.belongsTo(Users, { foreignKey: 'userId' });
+
+Kategori.hasMany(Barang, { foreignKey: 'kategoriId' });
+Barang.belongsTo(Kategori, { foreignKey: 'kategoriId' });
+
+Lokasi.hasMany(Barang, { foreignKey: 'lokasiId' });
+Barang.belongsTo(Lokasi, { foreignKey: 'lokasiId' });
 
 export default Barang;
